@@ -94,6 +94,10 @@ def trial_params():
 exp = EyeTrackingSerialSearchExperiment(subjectID='TEST',sessionID='t123444', datapath='./data', dummy_mode=True)
 event.globalKeys.add(key='c', modifiers=['ctrl'], func=exp.lastTrial, name='shutdown')
 
+
 exp.set_trial_sequence(trial_params())
 exp.tracker.calibrate()
 exp.run()
+
+
+
