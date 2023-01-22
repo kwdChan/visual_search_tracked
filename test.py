@@ -40,7 +40,7 @@ class EyeTrackingSerialSearchExperiment(EyeTrackingVisualSearchExperiment):
         el_tracker.sendMessage('gaze_trigger_ok')
 
 
-        # stimuli preseted
+        # stimuli presented
         obj_param_df = exp_stimuli.draw_search_array_temp(win, n_obj, is_present)
         win.flip()
         el_tracker.sendMessage('stim_onset')
@@ -91,7 +91,7 @@ def trial_params():
 
 
 
-exp = EyeTrackingSerialSearchExperiment(subjectID='TEST',sessionID='t12345', datapath='./data', dummy_mode=True)
+exp = EyeTrackingSerialSearchExperiment(subjectID='TEST',sessionID='t123444', datapath='./data', dummy_mode=True)
 event.globalKeys.add(key='c', modifiers=['ctrl'], func=exp.lastTrial, name='shutdown')
 
 exp.set_trial_sequence(trial_params())

@@ -11,7 +11,9 @@ def scale(arr, minimum, maximum):
     return arr*(maximum-minimum)+minimum
 
 def horizontal_hexagon_array(n_cols, n_rows, obj_distance):
-
+    """
+    gives the locations of objects for the search array
+    """
     # (2, n_cols, n_rows)
     # 0 -> columns coor
     # 1 -> rows coor
@@ -35,7 +37,6 @@ def horizontal_hexagon_array(n_cols, n_rows, obj_distance):
     # return (n, 2)
     return grid.reshape((2, -1)).transpose()
 
-
 class Visual_search_stimulus_condition:
     def __init__(self, win, n_columns, n_rows, obj_distance, target_params, distractor_params, distractor_occurances):
         """
@@ -49,7 +50,6 @@ class Visual_search_stimulus_condition:
         self.n_columns = n_columns
         self.n_rows = n_rows    
         self.obj_distance = obj_distance    
-
 
         # target parameters
         self.target_params = target_params
@@ -144,7 +144,7 @@ def hexagon_conj_search_array_df(
     distractor_params):
 
     """
-    getting the object parameters for a standard orientation-colour conjunction search task with jittering contrast
+    gives the object parameters in a dataframe for a standard orientation-colour conjunction search task with jittering contrast
     """
 
     obj_pos_list = visual_search_utils.horizontal_hexagon_array(n_cols, n_rows, obj_distance)
@@ -185,7 +185,8 @@ def conj_search_array_df(
     distractor_params):
 
     """
-    getting the object parameters for a standard orientation-colour conjunction search task with jittering contrast
+    Using the Kmeans method, 
+    gives the object parameters in a dataframe for a standard orientation-colour conjunction search task with jittering contrast
     """
 
     obj_pos_list = visual_search_utils.kmean_random(n_obj=n_obj, radius=radius, center=(0,0))
