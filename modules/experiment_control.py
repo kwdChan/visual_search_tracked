@@ -6,7 +6,12 @@ import os, json
 
 class EyeTrackingVisualSearchExperiment:
     def __init__(self, subjectID, sessionID, datapath, dummy_mode):
-
+        """
+        
+        
+        
+        
+        """
         # io 
         # TODO: assumed 
         self.visual_search_subject = recorder.Subject(os.path.join(datapath, subjectID))
@@ -52,6 +57,7 @@ class EyeTrackingVisualSearchExperiment:
     def set_trial_sequence(self, kwargs_list):
         """
         provide a list of dict 
+        the dict is the keyword arguments for self.trial
         """
         assert self.__trial_sequence is None, "self.__trial_sequence is already set"
         self.__trial_sequence = kwargs_list
