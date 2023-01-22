@@ -56,7 +56,7 @@ def draw_object(win, x, y, ori, contrast, colourRGB, width, height):
         lineWidth=0,
         contrast=contrast,
         # opacity=contrast,
-        fillColorSpace="rgb255",
+        fillColorSpace="rgb",
     ).draw()
 
 def get_search_array_df(
@@ -64,9 +64,9 @@ def get_search_array_df(
     n_columns,
     obj_distance, 
     is_target_present, 
-    target_params, 
+    target_param, 
     distractor_params, 
-    distractor_occurances,
+    distractor_proportion,
     ):
     """
     randomisation can be done here for trial-to-trial variation
@@ -77,10 +77,10 @@ def get_search_array_df(
     n_obj = len(object_pos)
 
     # distractor occurance
-    distractor_occurances = (distractor_occurances/np.array(distractor_occurances).sum()) # normalise it
+    distractor_proportion = (distractor_proportion/np.array(distractor_proportion).sum()) # normalise it
     n_distractor = n_obj - int(is_target_present)
     n_repeat_each_distractor_param = np.floor(
-        distractor_occurances * n_distractor
+        distractor_proportion * n_distractor
     ).astype(int)
     n_leftover = n_distractor - n_repeat_each_distractor_param.sum()
 
@@ -96,7 +96,7 @@ def get_search_array_df(
     ):
         param_list += [each_distractor_param] * each_occurance
     # target
-    param_list += [target_params] * int(is_target_present)
+    param_list += [target_param] * int(is_target_present)
     np.random.shuffle(param_list)
 
     # object dataframe

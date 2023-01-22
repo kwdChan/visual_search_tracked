@@ -27,13 +27,28 @@ class EyeTrackingVisualSearchExperiment:
             dummy_mode=dummy_mode, 
             host_ip="100.1.1.1"
         )
+        """
+        provide a list of dict 
+        the dict is the keyword arguments for self.trial
+        
+        self.__trial_label_sequence : the pre-planned sequence of trials
+        self.__trial_data_sequence : the data for the pre-planned sequence of trials
+
+        self.__trial_pool : the index of self.__trial_sequence_label of the upcomming trials
+        self.__completed_trial : the index of self.__trial_sequence_label of the successfully completed trials
+        self.__all_trial_history : the index of self.__trial_sequence_label of the started (completed or not) trials
+
+        """
+        
         self.current_trial_index = 0
-        self.__trial_sequence = None
+        self.__trial_label_sequence = None
+        self.__trial_data_sequence = None
         self.__trial_pool = []
         self.__completed_trial = []
         self.__all_trial_history = []
 
     def lastTrial(self):
+        "allow the experiment to be terminated externally"
         self.__trial_pool = []        
 
     def trial(self, **kwargs):
@@ -54,25 +69,37 @@ class EyeTrackingVisualSearchExperiment:
         return 'completed'
         
 
-    def set_trial_sequence(self, kwargs_list):
+    def set_trial_sequence(self, trial_label_sequence, trial_data_sequence):
         """
-        provide a list of dict 
-        the dict is the keyword arguments for self.trial
+        trial_label_sequence is a list of turple of the labels for each trial. it does not affect the trial condition. 
+        trial_data_sequence is a list of dict that contains the keyword arguments passed to self.trial for each trial. 
+
+        trial_label_sequence is saved by the trial schedualler in .JSON but trial_data_sequence is not. 
+        data in trial_data_sequence can be saved manually within the trial
         """
-        assert self.__trial_sequence is None, "self.__trial_sequence is already set"
-        self.__trial_sequence = kwargs_list
-        self.__trial_pool = kwargs_list
+
+        assert self.__trial_label_sequence is None, "self.__trial_label_sequence is already set"
+        self.__trial_label_sequence = trial_label_sequence
+        self.__trial_data_sequence = trial_data_sequence
+        self.__trial_pool = list(range(len(trial_label_sequence)))
+
+
+        # save to ensure __trial_label_sequence is possible to be saved as JSON
+        trial_info_output_path = os.path.join(self.visual_search_subject.current_session.path, 'planned_trial_labels.json')
+        json.dump(self.__trial_label_sequence, open(trial_info_output_path, 'w'))
+
+
 
     def __termination_handle(self):
         """
         1. transfer EDF file
-        2. save self.__trial_sequence, self.__trial_pool, self.__all_trial_history, self.__completed_trial
+        2. save self.__trial_label_sequence, self.__trial_pool, self.__all_trial_history, self.__completed_trial
         """
         # 1. transfer EDF file
         self.tracker.terminate_task()
 
         trial_history = dict(
-            trial_sequence = self.__trial_sequence, 
+            trial_sequence = self.__trial_label_sequence, 
             trial_pool = self.__trial_pool, 
             all_trial_history = self.__all_trial_history, 
             completed_trial = self.__completed_trial, 
@@ -92,26 +119,27 @@ class EyeTrackingVisualSearchExperiment:
         self.current_trial_index = len(self.__all_trial_history)
 
         # get trial condition, remove it from the trial pool
-        trial_kwargs = self.__trial_pool.pop(0)
+        trial_arg_idx = self.__trial_pool.pop(0)
+        trial_kwargs = self.__trial_data_sequence[trial_arg_idx]
         
-        # record the trial
-        self.__all_trial_history.append(trial_kwargs)
+        # record the start of the trial
+        self.__all_trial_history.append(trial_arg_idx)
 
         # start the trial
         status = self.trial(**trial_kwargs)
 
         # check the status of the trial
         if status == 'completed':
-            self.__completed_trial.append(trial_kwargs)
+            self.__completed_trial.append(trial_arg_idx)
 
         elif status == 'redo_later':
             # append to the end of trial pool
-            self.__trial_pool = self.__trial_pool + [trial_kwargs]
+            self.__trial_pool = self.__trial_pool + [trial_arg_idx]
             self.tracker.calibrate()
 
         elif status == 'redo_now':
             # append to the start of trial pool
-            self.__trial_pool = [trial_kwargs] + self.__trial_pool
+            self.__trial_pool = [trial_arg_idx] + self.__trial_pool
             self.tracker.calibrate()
 
         else:
