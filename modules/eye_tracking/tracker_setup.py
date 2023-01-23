@@ -241,8 +241,14 @@ class PsychopyEyeLinkSet:
                 'Press ENTER to continue'
         else:
             task_msg = """
-            Calibration required. 
+            Entering the calibration mode. 
             Press any key to continue. 
+
+            Follow the experiment's instruction for the calibration. 
+
+            If you are just taking a break on the chinrest without 
+            adjusting the position of your head or spectacle, 
+            press 'O' in the following blank screen to start the next trial
             """
         self.__show_msg(task_msg)
 
