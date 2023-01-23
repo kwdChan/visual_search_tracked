@@ -52,8 +52,8 @@ class Subject:
         """
         self.current_session = None
         
-    def new_session(self, sid):
-        self.current_session = Session(sid, self.path)
+    def new_session(self, sid, **metadata):
+        self.current_session = Session(sid, self.path, metadata)
 
 class Session:
     def __init__(self, sid, parent, metadata={}):

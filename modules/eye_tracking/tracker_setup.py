@@ -240,10 +240,10 @@ class PsychopyEyeLinkSet:
             task_msg = 'Dummy mode\n' + \
                 'Press ENTER to continue'
         else:
-            task_msg = 'On each trial, look at the cross to start,\n' + \
-                'then press SPACEBAR to end a trial\n' + \
-                '\nPress Ctrl-C if you need to quit the task early\n' + \
-                '\nNow, press ENTER twice to calibrate tracker'
+            task_msg = """
+            Calibration required. 
+            Press any key to continue. 
+            """
         self.__show_msg(task_msg)
 
         # calibrate

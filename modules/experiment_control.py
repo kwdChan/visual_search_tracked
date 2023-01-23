@@ -5,7 +5,7 @@ from .visual_search import recorder
 import os, json
 
 class EyeTrackingVisualSearchExperiment:
-    def __init__(self, subjectID, sessionID, datapath, dummy_mode):
+    def __init__(self, subjectID, sessionID, datapath, dummy_mode, comment):
         """
         
         
@@ -15,7 +15,7 @@ class EyeTrackingVisualSearchExperiment:
         # io 
         # TODO: assumed 
         self.visual_search_subject = recorder.Subject(os.path.join(datapath, subjectID))
-        self.visual_search_subject.new_session(sessionID)
+        self.visual_search_subject.new_session(sessionID, comment=comment)
 
         # tracker/display apparatus setup
         self.win = get_psychopy_window()
@@ -96,17 +96,19 @@ class EyeTrackingVisualSearchExperiment:
         2. save self.__trial_label_sequence, self.__trial_pool, self.__all_trial_history, self.__completed_trial
         """
         # 1. transfer EDF file
-        self.tracker.terminate_task()
-
+        
         trial_history = dict(
             trial_sequence = self.__trial_label_sequence, 
-            trial_pool = self.__trial_pool, 
+            trial_pool = self.__trial_pool, # this function won't be called unless __trial_pool is empty...
             all_trial_history = self.__all_trial_history, 
             completed_trial = self.__completed_trial, 
         )
         trial_info_output_path = os.path.join(self.visual_search_subject.current_session.path, 'trial_info.json')
 
         json.dump(trial_history, open(trial_info_output_path, 'w'))
+
+        self.tracker.terminate_task()
+
 
 
     def run_next_trial(self):

@@ -9,6 +9,8 @@ from modules.components import Gaze_trigger_v2
 from modules.experiment_control import EyeTrackingVisualSearchExperiment
 from modules.eye_tracking import tracker_setup
 from modules.visual_search import exp_stimuli
+import session_info
+
 
 os.chdir(os.path.dirname(__file__))
 
@@ -61,6 +63,11 @@ class EyeTrackingSerialSearchExperiment(EyeTrackingVisualSearchExperiment):
         )
         win.flip()
         el_tracker.sendMessage("blank_screen")
+
+        # check if recording has been aborted by the host pc
+        if not tracker.is_recording():
+            el_tracker.sendMessage("aborted_by_host")
+            return "redo_later"
 
         # stop recording
         tracker.stop_recording()
@@ -120,9 +127,18 @@ def trial_params():
 
 
 exp = EyeTrackingSerialSearchExperiment(
-    subjectID="TEST", sessionID="gagbvbf", datapath="./data", dummy_mode=True
+    subjectID  =  session_info.subjectID, 
+    sessionID  =  session_info.sessionID, 
+    datapath   =  "./data", 
+    dummy_mode =  session_info.dummy_mode,
+    comment    =  session_info.comment
 )
 event.globalKeys.add(key="c", modifiers=["ctrl"], func=exp.lastTrial, name="shutdown")
 exp.set_trial_sequence(*trial_params())
+
+
+
+exp_stimuli.intro(exp.win)
 exp.tracker.calibrate()
 exp.run()
+exp_stimuli.thanks(exp.win)
