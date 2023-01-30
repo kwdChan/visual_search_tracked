@@ -1,4 +1,4 @@
 subjectID="Daniel"
-sessionID="2"
-dummy_mode=False
+sessionID="vvfcc"
+dummy_mode=True
 comment = 'hello'

@@ -4,7 +4,6 @@ from psychopy import core, gui, visual, event, monitors
 import numpy as np
 import pandas as pd
 
-
 def scale(arr, minimum, maximum):
     """
     scale the number from [0, 1] to [minimum, maximum]
@@ -104,6 +103,10 @@ def get_search_array_df(
     object_parameters = object_parameters.join(pd.DataFrame(param_list))
     object_parameters["contrast"] = 1
     return object_parameters
+
+
+
+
 
 def draw_from_df(win, obj_func, object_param_df, shared_variables):
     """

@@ -50,7 +50,7 @@ class EyeTrackingSerialSearchExperiment(EyeTrackingVisualSearchExperiment):
             win,
             exp_stimuli.draw_object,
             object_df,
-            dict(width=params.bar_width, height=params.bar_height),
+            dict(colourRGB=params.bar_colourRGB),
         )
         win.flip()
         el_tracker.sendMessage("stim_onset")
