@@ -83,7 +83,7 @@ def get_search_array_df(
     ).astype(int)
     n_leftover = n_distractor - n_repeat_each_distractor_param.sum()
 
-    print(n_leftover)
+    #print(n_leftover)
     # TODO: to have the leftover randomly assigned according to occurance
     for i in range(int(n_leftover)):
         n_repeat_each_distractor_param[i] += 1

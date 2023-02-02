@@ -5,7 +5,7 @@ import random
 from psychopy import core, event, gui, monitors, visual
 
 from modules import monitor_settings, params
-from modules.components import Gaze_trigger_v2
+from modules.components import Gaze_trigger_v2, Gaze_trigger_v3
 from modules.experiment_control import EyeTrackingVisualSearchExperiment
 from modules.eye_tracking import tracker_setup
 from modules.visual_search import exp_stimuli
@@ -36,7 +36,7 @@ class EyeTrackingSerialSearchExperiment(EyeTrackingVisualSearchExperiment):
             return "redo_now"
 
         # wait for fixation
-        gaze_trigger_ok = Gaze_trigger_v2(
+        gaze_trigger_ok = Gaze_trigger_v3(
             tracker, target_pos_psychopy_coor=(0, 0)
         ).waitTrigger()
 
