@@ -109,14 +109,15 @@ def trial_params():
     trial_data = []
     for i_num_rc, i_dist_occ, i_is_present in trial_conditions:
 
-        df = exp_stimuli.get_search_array_df(
-            n_rows=i_num_rc,
-            n_columns=i_num_rc,
+        df = exp_stimuli.get_search_array_df_with_noise(
+            n_rows=i_num_rc[0],
+            n_columns=i_num_rc[1],
             obj_distance=params.obj_spacing,
             is_target_present=i_is_present,
             target_param=params.target_param,
             distractor_params=params.distractor_params,
             distractor_proportion=i_dist_occ,
+            noise_level = params.noise_level
         )
 
         trial_data.append(

@@ -38,6 +38,21 @@ def horizontal_hexagon_array(n_cols, n_rows, obj_distance):
     # return (n, 2)
     return grid.reshape((2, -1)).transpose()
 
+def vertical_hexagon_array(n_cols, n_rows, obj_distance):
+    obj_pos = horizontal_hexagon_array(n_cols, n_rows, obj_distance)
+    a,  b = obj_pos[:, 0].copy(), obj_pos[:, 1].copy()
+    obj_pos[:, 1], obj_pos[:, 0] = a, b
+
+    return obj_pos
+
+def vertical_hexagon_array_with_noise(n_cols, n_rows, obj_distance, noise_level):
+    """
+    gives the locations of objects for the search array
+    """
+    
+    obj_pos = vertical_hexagon_array(n_cols, n_rows, obj_distance) 
+    return obj_pos + (noise_level*obj_distance)*np.random.random(obj_pos.shape)
+
 
 def draw_object(win, x, y, ori, contrast, colourRGB, width, height):
     """
@@ -57,6 +72,53 @@ def draw_object(win, x, y, ori, contrast, colourRGB, width, height):
         # opacity=contrast,
         fillColorSpace="rgb",
     ).draw()
+
+def get_search_array_df_with_noise(
+    n_rows, 
+    n_columns,
+    obj_distance, 
+    is_target_present, 
+    target_param, 
+    distractor_params, 
+    distractor_proportion,
+    noise_level
+    ):
+    """
+    randomisation can be done here for trial-to-trial variation
+
+    output the stimulus parameters produce the exact same stimulus
+    """
+    object_pos = vertical_hexagon_array_with_noise(n_columns, n_rows, obj_distance, noise_level)
+    n_obj = len(object_pos)
+
+    # distractor occurance
+    distractor_proportion = (distractor_proportion/np.array(distractor_proportion).sum()) # normalise it
+    n_distractor = n_obj - int(is_target_present)
+    n_repeat_each_distractor_param = np.floor(
+        distractor_proportion * n_distractor
+    ).astype(int)
+    n_leftover = n_distractor - n_repeat_each_distractor_param.sum()
+
+    #print(n_leftover)
+    # TODO: to have the leftover randomly assigned according to occurance
+    for i in range(int(n_leftover)):
+        n_repeat_each_distractor_param[i] += 1
+
+    # distractor object list
+    param_list = []
+    for each_distractor_param, each_occurance in zip(
+        distractor_params, n_repeat_each_distractor_param
+    ):
+        param_list += [each_distractor_param] * each_occurance
+    # target
+    param_list += [target_param] * int(is_target_present)
+    np.random.shuffle(param_list)
+
+    # object dataframe
+    object_parameters = pd.DataFrame(object_pos, columns=["x", "y"])
+    object_parameters = object_parameters.join(pd.DataFrame(param_list))
+    object_parameters["contrast"] = 1
+    return object_parameters
 
 def get_search_array_df(
     n_rows, 
@@ -106,8 +168,6 @@ def get_search_array_df(
 
 
 
-
-
 def draw_from_df(win, obj_func, object_param_df, shared_variables):
     """
     object_param_df: pd.DataFrame
@@ -118,109 +178,6 @@ def draw_from_df(win, obj_func, object_param_df, shared_variables):
     """
     for idx, param in object_param_df.iterrows():
         obj_func(win, **dict(**shared_variables, **param))
-
-
-def hexagon_conj_search_array_df(
-    n_cols,
-    n_rows,
-    obj_distance,
-    n_target,
-    target_param,
-    distractor_params,
-    minimum_contrast,
-    maximum_contrast,
-):
-
-    """
-    gives the object parameters in a dataframe for a standard orientation-colour conjunction search task with jittering contrast
-    """
-
-    obj_pos_list = visual_search_utils.horizontal_hexagon_array(
-        n_cols, n_rows, obj_distance
-    )
-    n_obj = len(obj_pos_list)
-    obj_contrast_list = visual_search_utils.scale(
-        np.random.random(n_obj), minimum=minimum_contrast, maximum=maximum_contrast
-    )
-
-    # distractor
-    distractor_params = distractor_params[:]
-    np.random.shuffle(distractor_params)
-
-    n_distractor = n_obj - n_target
-    n_evenly_divided = n_distractor // len(distractor_params)
-    n_leftout = n_distractor - n_evenly_divided * len(distractor_params)
-    distractor_param_list = (
-        distractor_params * n_evenly_divided + distractor_params[:n_leftout]
-    )
-
-    # target
-    target_param_list = [target_param] * int(n_target)
-
-    # the full list
-    param_list = distractor_param_list + target_param_list
-    np.random.shuffle(param_list)
-
-    # data frame for object parambers
-    object_parameters = pd.DataFrame(obj_pos_list, columns=["x", "y"])
-    object_parameters["contrast"] = obj_contrast_list
-    param_list = pd.DataFrame(param_list).values
-
-    object_parameters["ori"] = param_list[:, 0]
-    object_parameters["color_name"] = param_list[:, 1]
-
-    return object_parameters
-
-
-def conj_search_array_df(
-    n_obj,
-    n_target,
-    radius,
-    target_param,
-    distractor_params,
-    minimum_contrast,
-    maximum_contrast,
-):
-
-    """
-    Using the Kmeans method,
-    gives the object parameters in a dataframe for a standard orientation-colour conjunction search task with jittering contrast
-    """
-
-    obj_pos_list = visual_search_utils.kmean_random(
-        n_obj=n_obj, radius=radius, center=(0, 0)
-    )
-    obj_contrast_list = visual_search_utils.scale(
-        np.random.random(n_obj), minimum=minimum_contrast, maximum=maximum_contrast
-    )
-
-    # distractor
-    distractor_params = distractor_params[:]
-    np.random.shuffle(distractor_params)
-
-    n_distractor = n_obj - n_target
-    n_evenly_divided = n_distractor // len(distractor_params)
-    n_leftout = n_distractor - n_evenly_divided * len(distractor_params)
-    distractor_param_list = (
-        distractor_params * n_evenly_divided + distractor_params[:n_leftout]
-    )
-
-    # target
-    target_param_list = [target_param] * int(n_target)
-
-    # the full list
-    param_list = distractor_param_list + target_param_list
-    np.random.shuffle(param_list)
-
-    # data frame for object parambers
-    object_parameters = pd.DataFrame(obj_pos_list, columns=["x", "y"])
-    object_parameters["contrast"] = obj_contrast_list
-    param_list = pd.DataFrame(param_list).values
-
-    object_parameters["ori"] = param_list[:, 0]
-    object_parameters["color_name"] = param_list[:, 1]
-
-    return object_parameters
 
 
 def intro(win):
