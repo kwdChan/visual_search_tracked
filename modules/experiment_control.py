@@ -90,6 +90,9 @@ class EyeTrackingVisualSearchExperiment:
 
 
 
+    def terminate(self):
+        self.__termination_handle()
+
     def __termination_handle(self):
         """
         1. transfer EDF file
@@ -108,6 +111,7 @@ class EyeTrackingVisualSearchExperiment:
         json.dump(trial_history, open(trial_info_output_path, 'w'))
 
         self.tracker.terminate_task()
+        self.win.close()
 
 
 

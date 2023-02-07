@@ -1,9 +1,11 @@
 from psychopy import visual, core, event, monitors, gui
+import psychopy
 
 import numpy as np
 WIN_PIX = [2048, 1152]
 MONITOR_WIDTH_CM = 60
 MONITOR_DISTANCE_CM = 70.0
+psychopy.prefs.hardware['audioLib'] = [ 'PTB','pyo', 'sounddevice', 'pygame' ]
 
 def get_psychopy_window():
     """
@@ -19,15 +21,13 @@ def get_psychopy_window():
         units='pix')
     return win
 
+
 def cm2pix(cm):
     return int(cm*WIN_PIX[0]/MONITOR_WIDTH_CM)
 
 def deg2pix(deg):
     assert deg > 0
     len_in_cm = MONITOR_DISTANCE_CM*np.tan(deg2rad(deg))
-    print(deg)
-    print(len_in_cm)
-    print(cm2pix(len_in_cm))
     return cm2pix(len_in_cm)
 
 def deg2rad(deg):

@@ -1,8 +1,30 @@
 from __future__ import absolute_import, division
 import psychopy
-from psychopy import core, gui, visual, event, monitors
+from psychopy import core, gui, visual, event, monitors, sound
 import numpy as np
 import pandas as pd
+
+CORRECT_TONE = sound.Sound(value='C', secs=0.1, volume=1,octave=6, sampleRate=44100)
+def correct_tone(win):
+
+    t = win.getFutureFlipTime(clock='ptb')
+    CORRECT_TONE.play(when=t)
+
+
+DISPLAY_TONE = sound.Sound(value='C', secs=0.05, volume=1,octave=5, sampleRate=44100)
+def display_tone(win):
+    t = win.getFutureFlipTime(clock='ptb')
+    DISPLAY_TONE.play(when=t)
+
+
+INCORRECT_TONE1 = sound.Sound(value='D', secs=0.1, octave=5, volume=0.5, sampleRate=44100)
+INCORRECT_TONE2 = sound.Sound(value='C', secs=0.1, octave=5, volume=0.5, sampleRate=44100)
+def incorrect_tone(win):
+    
+    t = win.getFutureFlipTime(clock='ptb')
+    INCORRECT_TONE1.play(when=t)
+    INCORRECT_TONE2.play(when=t)
+
 
 def scale(arr, minimum, maximum):
     """
@@ -181,7 +203,14 @@ def draw_from_df(win, obj_func, object_param_df, shared_variables):
 
 
 def intro(win):
-    visual.TextStim(win, text="Please press space to start", color=(1, 1, 1)).draw()
+    visual.TextStim(win, text='''
+During the visual search task: 
+
+*Press P for presence*
+*Press Q for absence*
+
+Please press space to continue
+        ''', color=(1, 1, 1)).draw()
     win.flip()
 
     waitResponse = event.waitKeys(keyList=["space"])

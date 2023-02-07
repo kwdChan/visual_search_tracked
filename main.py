@@ -3,17 +3,28 @@ import os
 import random
 
 from psychopy import core, event, gui, monitors, visual
+from modules import monitor_settings
 
-from modules import monitor_settings, params
-from modules.components import Gaze_trigger_v2, Gaze_trigger_v3
+from modules.components import Gaze_trigger_v3
 from modules.experiment_control import EyeTrackingVisualSearchExperiment
 from modules.eye_tracking import tracker_setup
 from modules.visual_search import exp_stimuli
+
 import session_info
-
-
 os.chdir(os.path.dirname(__file__))
 
+if session_info.stimulus_type == 'serial':
+    from modules import params_serial_search as params
+
+elif  session_info.stimulus_type == 'parallel':
+    from modules import params_feature_search as params
+else: 
+    raise ValueError('stimulus_type must be either serial or parallel')
+
+fixation_params = params.fixation_params
+fixation_params['trigger_allowance_pix']=monitor_settings.deg2pix(
+    session_info.fixation_trigger_allowance_deg
+    )
 
 class EyeTrackingSerialSearchExperiment(EyeTrackingVisualSearchExperiment):
     def __init__(self, **kwargs):
@@ -28,7 +39,17 @@ class EyeTrackingSerialSearchExperiment(EyeTrackingVisualSearchExperiment):
         # inter-trial intervals
         core.wait(params.inter_trial_interval)
 
-        # start recording
+        # drift check
+        nth_trial = self.current_trial_index
+        every_nth_trial = params.drift_correction_params['every_nth_trial']
+
+        if not (nth_trial % every_nth_trial):
+            order = (nth_trial/every_nth_trial)%len(params.drift_correction_params['positions'])
+            coords = params.drift_correction_params['positions'][int(order)]
+            tracker.drift_correction(coords)
+
+            core.wait(params.drift_correction_params['wait_after_correction_sec'])
+
         recording_ok = tracker.start_recording(self.current_trial_index)
 
         # if failed to record
@@ -36,12 +57,16 @@ class EyeTrackingSerialSearchExperiment(EyeTrackingVisualSearchExperiment):
             return "redo_now"
 
         # wait for fixation
+        exp_stimuli.display_tone(win)
         gaze_trigger_ok = Gaze_trigger_v3(
-            tracker, target_pos_psychopy_coor=(0, 0)
+            tracker, target_pos_psychopy_coor=(0, 0), 
+            fixation_cross_params=fixation_params
         ).waitTrigger()
 
         # if failed to fixate, recalibration needed, or tracker disconnected
         if not gaze_trigger_ok:
+            exp_stimuli.incorrect_tone(win)
+            el_tracker.sendMessage("gaze_trigger_timeout")
             return "redo_now"
         el_tracker.sendMessage("gaze_trigger_ok")
 
@@ -79,6 +104,16 @@ class EyeTrackingSerialSearchExperiment(EyeTrackingVisualSearchExperiment):
         else:
             response = waitResponse[0]
 
+
+
+        if ((response[0] == 'p') and is_present):
+            exp_stimuli.correct_tone(win)
+        elif ((response[0] == 'q') and (not is_present)):
+            exp_stimuli.correct_tone(win)
+        else:
+            exp_stimuli.incorrect_tone(win)
+
+
         data["keyPressed"], data["timeTaken"] = response
 
         self.visual_search_subject.current_session.record_trial_data(object_df, **data)
@@ -90,6 +125,7 @@ class EyeTrackingSerialSearchExperiment(EyeTrackingVisualSearchExperiment):
         )
         return "completed"
 
+num_repeat = params.number_of_repeat if (session_info.overwrite_n_repeat is None) else session_info.overwrite_n_repeat
 
 def trial_params():
 
@@ -100,7 +136,7 @@ def trial_params():
                 params.num_row_column, params.distractor_proportions, [True, False]
             )
         )
-        * params.number_of_repeat
+        * num_repeat
     )
 
     # create object df
@@ -121,7 +157,7 @@ def trial_params():
         )
 
         trial_data.append(
-            dict(object_df=df, n_obj=i_num_rc * i_num_rc, is_present=i_is_present)
+            dict(object_df=df, n_obj=i_num_rc[0] * i_num_rc[1], is_present=i_is_present)
         )
 
     return trial_conditions, trial_data
@@ -132,11 +168,10 @@ exp = EyeTrackingSerialSearchExperiment(
     sessionID  =  session_info.sessionID, 
     datapath   =  "./data", 
     dummy_mode =  session_info.dummy_mode,
-    comment    =  session_info.comment
+    comment    =  session_info.comment + ""
 )
-event.globalKeys.add(key="c", modifiers=["ctrl"], func=exp.lastTrial, name="shutdown")
+event.globalKeys.add(key="g", modifiers=["ctrl"], func=exp.terminate, name="shutdown")
 exp.set_trial_sequence(*trial_params())
-
 
 
 exp_stimuli.intro(exp.win)

@@ -233,6 +233,16 @@ class PsychopyEyeLinkSet:
             event.waitKeys()
             self.win.flip()
 
+
+    def drift_correction(self, psychopy_pos):
+        coords = psychopy_pos[0]+self.scn_width/2, -psychopy_pos[1]+self.scn_height/2
+
+        try: 
+            self.el_tracker.doDriftCorrect(int(coords[0]), int(coords[1]), True, False)
+
+        except RuntimeError as err:
+            print (err)
+
     def calibrate(self):
         
         # show instruction
@@ -244,11 +254,6 @@ class PsychopyEyeLinkSet:
             Entering the calibration mode. 
             Press any key to continue. 
 
-            Follow the experiment's instruction for the calibration. 
-
-            If you are just taking a break on the chinrest without 
-            adjusting the position of your head or spectacle, 
-            press 'O' in the following blank screen to start the next trial
             """
         self.__show_msg(task_msg)
 
