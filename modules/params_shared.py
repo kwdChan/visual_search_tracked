@@ -44,7 +44,7 @@ target_param = {"width": small_bar_width, "height": small_bar_height, "ori": 0}
 # array parameters
 num_row_column = [[4, 3], [10, 8], [12, 10]]
 obj_spacing = deg2pix(2.5)
-noise_level = 0.0 # perentage of obj_spacing
+noise_level = 0.1 # perentage of obj_spacing
 
 
 # experiment parameters

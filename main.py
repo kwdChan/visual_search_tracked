@@ -16,7 +16,7 @@ os.chdir(os.path.dirname(__file__))
 if session_info.stimulus_type == 'serial':
     from modules import params_serial_search as params
 
-elif  session_info.stimulus_type == 'parallel':
+elif session_info.stimulus_type == 'parallel':
     from modules import params_feature_search as params
 else: 
     raise ValueError('stimulus_type must be either serial or parallel')
@@ -35,9 +35,6 @@ class EyeTrackingSerialSearchExperiment(EyeTrackingVisualSearchExperiment):
         tracker = self.tracker
         win = tracker.win
         el_tracker = tracker.el_tracker
-
-        # inter-trial intervals
-        core.wait(params.inter_trial_interval)
 
         # drift check
         nth_trial = self.current_trial_index
@@ -94,9 +91,6 @@ class EyeTrackingSerialSearchExperiment(EyeTrackingVisualSearchExperiment):
             el_tracker.sendMessage("aborted_by_host")
             return "redo_later"
 
-        # stop recording
-        tracker.stop_recording()
-
         # record responses (local)
         data = dict(is_present=is_present, n_obj=n_obj)
         if waitResponse is None:
@@ -123,6 +117,12 @@ class EyeTrackingSerialSearchExperiment(EyeTrackingVisualSearchExperiment):
         tracker.record_variables_end_of_trial(
             key_pressed=response[0], response_time_msec=response[1] * 1000
         )
+
+        # inter-trial intervals
+        core.wait(params.inter_trial_interval)
+
+        # stop recording
+        tracker.stop_recording()
         return "completed"
 
 num_repeat = params.number_of_repeat if (session_info.overwrite_n_repeat is None) else session_info.overwrite_n_repeat
@@ -168,7 +168,7 @@ exp = EyeTrackingSerialSearchExperiment(
     sessionID  =  session_info.sessionID, 
     datapath   =  "./data", 
     dummy_mode =  session_info.dummy_mode,
-    comment    =  session_info.comment + ""
+    comment    =  session_info.comment + f"\nfixation_trigger_allowance_deg: {session_info.fixation_trigger_allowance_deg}"
 )
 event.globalKeys.add(key="g", modifiers=["ctrl"], func=exp.terminate, name="shutdown")
 exp.set_trial_sequence(*trial_params())
@@ -178,3 +178,4 @@ exp_stimuli.intro(exp.win)
 exp.tracker.calibrate()
 exp.run()
 exp_stimuli.thanks(exp.win)
+exp.win.close()

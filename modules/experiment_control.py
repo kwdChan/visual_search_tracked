@@ -111,7 +111,6 @@ class EyeTrackingVisualSearchExperiment:
         json.dump(trial_history, open(trial_info_output_path, 'w'))
 
         self.tracker.terminate_task()
-        self.win.close()
 
 
 

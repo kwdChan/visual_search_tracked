@@ -93,6 +93,6 @@ class Session:
         json.dump(self.trial_data, open(self.trial_data_path, 'w'))
 
         # object_df 
-        path = os.path.join(self.stimulus_data_path, str(trial_id))
+        path = os.path.join(self.stimulus_data_path, str(trial_id)+'.csv')
         assert not os.path.exists(path), 'already exists. not overwritting'
         object_df.to_csv(path)

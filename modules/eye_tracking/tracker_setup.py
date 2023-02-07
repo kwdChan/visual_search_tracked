@@ -379,7 +379,7 @@ class PsychopyEyeLinkSet:
         # send a message to mark trial end
         el_tracker.sendMessage('TRIAL_RESULT %d' % pylink.TRIAL_ERROR)
 
-    def drawImage_to_host(self, img_path):
+    def drawImage_to_host(self, imgPIL):
         """
 
         # show a backdrop image on the Host screen, imageBackdrop() the recommended
@@ -403,10 +403,9 @@ class PsychopyEyeLinkSet:
         # Use the code commented below to convert the image and send the backdrop
         """
         scn_width, scn_height = self.scn_width, self.scn_height
-        im = Image.open(img_path)  # read image with PIL
-        im = im.resize((scn_width, scn_height))
-        img_pixels = im.load()  # access the pixel data of the image
-        pixels = [[img_pixels[i, j] for i in range(scn_width)]
+
+        imgPIL = imgPIL.load()  # access the pixel data of the image
+        pixels = [[imgPIL[i, j] for i in range(scn_width)]
                 for j in range(scn_height)]
         self.el_tracker.bitmapBackdrop(scn_width, scn_height, pixels,
                                 0, 0, scn_width, scn_height,

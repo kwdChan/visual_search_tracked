@@ -1,11 +1,11 @@
 subjectID="Daniel_test"
 
-sessionID="DC1"
+sessionID="DC7"
 
-comment = """serial"""
+comment = """debug"""
 
 # {'serial', 'parallel'}
-stimulus_type = "serial"
+stimulus_type = "parallel"
 
 # None or int
 overwrite_n_repeat = 5

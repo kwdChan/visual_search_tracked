@@ -8,7 +8,7 @@ from psychopy import visual, core, event, monitors, gui
 import numpy as np
 #from .eye_tracking.dummy_eye_movement import DummyEyeMovementCursor
 
-class Gaze_trigger_v3:
+class Gaze_trigger_v3_0:
     def __init__(self, tracker_window, target_pos_psychopy_coor, fixation_cross_params):
         self.tracker_window = tracker_window
         self.win = tracker_window.win
